@@ -12,6 +12,7 @@
         <module>api</module>
         <module>provider</module>
         <module>consumer</module>
+        <module>entity</module>
     </modules>
 
     <parent>
