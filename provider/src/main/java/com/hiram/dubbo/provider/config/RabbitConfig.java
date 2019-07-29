@@ -8,6 +8,7 @@ import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.SerializerMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -66,7 +67,7 @@ public class RabbitConfig {
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate template = new RabbitTemplate(connectionFactory());
         template.setMandatory(true);
-        template.setMessageConverter(new SerializerMessageConverter());
+        template.setMessageConverter(producerJackson2MessageConverter());
         return template;
     }
 
@@ -80,7 +81,7 @@ public class RabbitConfig {
      TopicExchange:多关键字匹配
      */
     @Bean
-    public DirectExchange defaultExchange() {
+    public DirectExchange exchange() {
         return new DirectExchange(EXCHANGE_A);
     }
 
@@ -94,10 +95,22 @@ public class RabbitConfig {
         return new Queue(QUEUE_A, true);
     }
 
+    /**
+     * 绑定交换机与队列关系
+     * @return
+     */
     @Bean
     public Binding binding() {
+        return BindingBuilder.bind(queueA()).to(exchange()).with(RabbitConfig.ROUTINGKEY_A);
+    }
 
-        return BindingBuilder.bind(queueA()).to(defaultExchange()).with(RabbitConfig.ROUTINGKEY_A);
+    /**
+     * 设置发送方可以
+     * @return
+     */
+    @Bean
+    public Jackson2JsonMessageConverter producerJackson2MessageConverter(){
+        return new Jackson2JsonMessageConverter();
     }
 
 
